@@ -1,41 +1,35 @@
-const fs = require('fs').promises;
-const { default: axios } = require('axios');
+const fs = require('node:fs/promises');
+const axios = require('axios');
 const path = require('path');
 
 // File where tokens are temporarily stored
-const tokenPath = path.join(__dirname, '../../token.json');
+const tokenPath = path.join(process.cwd(), 'token.json');
 
-// Save token to file
 const saveTokenTemporarily = async ({ token }) => {
   try {
-    await fs.writeFile(tokenPath, JSON.stringify(token, null, 2), 'utf-8');           //We can implement hashing techniques here to store data safely
-    console.log('Token saved successfully');
+    // Saving token to file (for development or temporary use only)
+    // TODO: Consider encrypting the token before saving it in production.
+    await fs.writeFile(tokenPath, JSON.stringify(token, null, 2), 'utf-8');
+    console.log('Token Refreshed successfully');
+
   } catch (err) {
-    console.error('Failed to save token', err);
+    console.error('Failed to save token:', err.message);
   }
 };
 
-// Read token from file
-const fetchAsanaToken = async () => {
+
+/**
+ * Fetches a new access token using the authorization code or refresh token.
+ * @param {Object} params The parameters to request the token.
+ * @param {string} params.grant_type The grant type ('authorization_code' or 'refresh_token').
+ * @param {string} [params.code] The authorization code (if grant_type is 'authorization_code').
+ * @param {string} [params.refresh_token] The refresh token (if grant_type is 'refresh_token').
+ * @returns {string} The access token.
+ */
+const getAccessTokenAndDetails = async ({ grant_type = 'authorization_code', code = null, refresh_token = null, prevData = {} }) => {
   try {
-    const fileData = await fs.readFile(tokenPath, 'utf-8');
-    const data = JSON.parse(fileData);
-    const { expires_at, access_token, refresh_token } = data;
-
-    if (Date.now() < expires_at) {
-      return access_token;
-    } else {
-      console.log('Token Expired');
-      return getAccessTokenAndDetails({ grant_type: 'refresh_token', refresh_token });
-    }
-  } catch (err) {
-    console.error('Error reading or parsing token.json:', err.message);
-    throw err;
-  }
-};
-
-const getAccessTokenAndDetails = async({ grant_type = 'authorization_code', code = null, refresh_token = null }) => {
-  const tokenRes = await axios.post('https://app.asana.com/-/oauth_token', null, {
+    // Make the API request to Asana to get the new access token
+    const tokenRes = await axios.post('https://app.asana.com/-/oauth_token', null, {
       params: {
         grant_type,
         client_id: process.env.ASANA_CLIENT_ID,
@@ -43,12 +37,27 @@ const getAccessTokenAndDetails = async({ grant_type = 'authorization_code', code
         redirect_uri: process.env.ASANA_REDIRECT_URI,
         refresh_token,
         code,
-      }
+      },
     });
 
-    const tokenData = { ...tokenRes.data, expires_at: Date.now() + tokenRes.data.expires_in * 1000 };
-    await saveTokenTemporarily({ token: tokenData });
-    return tokenData.access_token;
-}
+    console.log('Prev Data', prevData);
 
-module.exports = { saveTokenTemporarily, fetchAsanaToken, getAccessTokenAndDetails };
+
+    const tokenData = { 
+      ...prevData,
+      ...tokenRes.data, 
+      expires_at: Date.now() + tokenRes.data.expires_in * 1000 
+    };
+    console.log('new token Data', tokenData);
+
+    // Save the new token to the file
+    await saveTokenTemporarily({ token: tokenData });
+
+    return tokenData.access_token;
+  } catch (err) {
+    console.error('Error fetching token from Asana:', err);
+    throw new Error('Failed to fetch token from Asana: ' + err.message);
+  }
+};
+
+module.exports = { saveTokenTemporarily, getAccessTokenAndDetails };

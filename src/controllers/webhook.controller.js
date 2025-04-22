@@ -1,15 +1,19 @@
-// src/controllers/webhook.controller.js
 const { ApiClient, WebhooksApi } = require('asana');
-const { fetchAsanaToken } = require('../../utils/token.helper');
 const { getUserInfo } = require('../../utils/user.helper');
 const { getAllProjects } = require('../../utils/project.helper');
+const { fetchAsanaToken } = require('../../utils/asana.helper');
 
-// Init Asana API client with token
+// Initialise Asana API client with token
 const initAsanaClient = async () => {
-  const accessToken = await fetchAsanaToken();
-  const client = new ApiClient();
-  client.authentications['token'].accessToken = accessToken;
-  return new WebhooksApi(client);
+  try {
+    const accessToken = await fetchAsanaToken();
+    const client = new ApiClient();
+    client.authentications['token'].accessToken = accessToken;
+    return new WebhooksApi(client);
+  } catch (error) {
+    console.error('Error initializing Asana client:', error.message);
+    throw new Error('Failed to initialize Asana client');
+  }
 };
 
 // Create a new webhook
@@ -17,7 +21,7 @@ const createNewWebhook = async () => {
   try {
     const resArr = [];
     const accessToken = await fetchAsanaToken();
-    const projectIds = await getAllProjects(accessToken)
+    const projectIds = await getAllProjects(accessToken);
 
     const webhooksApi = await initAsanaClient();
 
@@ -33,18 +37,21 @@ const createNewWebhook = async () => {
           ]
         }
       };
+
       try {
         const response = await webhooksApi.createWebhook(body);
         console.log("Webhook created:", response.data);
         resArr.push({ resourceId, status: 'Success', data: response.data });
       } catch (error) {
-        resArr.push({ resourceId, status: 'Failed', error: error.message })
+        console.error(`Failed to create webhook for resourceId ${resourceId}:`, error.message);
+        resArr.push({ resourceId, status: 'Failed', error: error.message });
       }
     }
-    return resArr;
+
+    return resArr; // Return the results of all attempts
   } catch (error) {
     console.error("Webhook creation failed:", error?.response?.body || error.message);
-    throw error;
+    throw new Error('Failed to create webhooks');
   }
 };
 
@@ -53,18 +60,21 @@ const receiveWebhook = async (req, res) => {
   const hookSecret = req.headers["x-hook-secret"];
   const eventSignature = req.headers["x-hook-signature"];
 
-  if (hookSecret) {     // Webhook is being verified
+  // Handle handshake verification (initial webhook setup)
+  if (hookSecret) {
     console.log("Received X-Hook-Secret handshake");
-    res.set("X-Hook-Secret", hookSecret); // Save hookSecret for future events verification
+    res.set("X-Hook-Secret", hookSecret); // Save hookSecret for future event verification
     return res.status(200).send();
   }
 
-  if (eventSignature) {   //Webhook event transmitted, TODO: Implement cross check of singature with stored hooksecret
+  // Handle actual webhook event transmission (task changes, etc.)
+  if (eventSignature) {
     console.log(`Webhook Event received at ${new Date()}`);
     console.log("Events:", JSON.stringify(req.body.events, null, 2));
     return res.status(200).send();
   }
 
+  // If neither hookSecret nor eventSignature are present, return an error
   return res.status(400).send("Invalid webhook payload");
 };
 
@@ -78,17 +88,18 @@ const getAllWebhooks = async () => {
     const workspaceId = workspaceGid;
     const response = await webhooksApi.getWebhooks(workspaceId);
     console.log("Webhooks fetched:", response.data);
+
     return response.data;
   } catch (error) {
     console.error("Failed to fetch webhooks:", error?.response?.body || error.message);
-    throw error;
+    throw new Error('Failed to fetch webhooks');
   }
 };
 
 // const deleteWebhooks = async () => {
 //   try {
 //     const webhooksApi = await initAsanaClient();
-//     const response = await webhooksApi.deleteWebhook('1210041128250177');
+//     const response = await webhooksApi.deleteWebhook('1210041297063357');
 //     console.log("Webhooks deleted:", response.data);
 //     return response.data;
 //   } catch (error) {

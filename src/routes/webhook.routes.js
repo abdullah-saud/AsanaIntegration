@@ -3,33 +3,32 @@ const {
   createNewWebhook,
   receiveWebhook,
   getAllWebhooks,
+  deleteWebhooks,
 } = require('../controllers/webhook.controller');
 
 const router = express.Router();
 
 // Create new webhook
 router.post('/webhook/create', async (_, res) => {
-  try {
-    const result = await createNewWebhook();
-    res.status(201).json({ webhook: result });
-  } catch (error) {
-    res.status(500).json({ message: 'Webhook creation failed', error: error.message });
-  }
+  const result = await createNewWebhook();
+  res.status(201).json({ webhook: result });
 });
 
 // Receive webhook from Asana
 router.post('/webhook/receive', async (req, res) => {
-  await receiveWebhook(req, res); // already handles response in controller
+  await receiveWebhook(req, res); // Ensure the controller handles both success and error
 });
 
 // Get all registered webhooks
 router.get('/webhook/all', async (req, res) => {
-  try {
-    const webhooks = await getAllWebhooks();
-    res.status(200).json({ webhooks });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch webhooks', error: error.message });
-  }
+  const webhooks = await getAllWebhooks();
+  res.status(200).json({ webhooks });
 });
+
+// router.get('/webhook/delete', async (req, res) => {
+//   const webhooks = await deleteWebhooks();
+//   res.status(200).json({ webhooks });
+// });
+
 
 module.exports = router;

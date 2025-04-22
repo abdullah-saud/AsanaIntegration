@@ -43,9 +43,9 @@ ASANA_WEBHOOK_TARGET=https://0246-2401-4900-883c-10bc-d0f8-4817-7aef-e858.ngrok-
 
 🧪 Run the App
 
-npm start
+npm run dev
 
-Visit http://localhost:3000/asana/getRedirectUrl in your browser to begin the OAuth2 flow.
+Visit http://localhost:3008/asana/getRedirectUrl in your browser to begin the OAuth2 flow.
 
 📦 Directory Structure
 
@@ -78,7 +78,7 @@ akroolo-assignment/
 🌐 Webhook Setup
 Use Ngrok to expose localhost:
 
-ngrok http 3000
+ngrok http 3008
 
 Then use the HTTPS URL for webhook registration:
 
