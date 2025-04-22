@@ -7,7 +7,6 @@ const app = express();
 // Built-in middleware to parse JSON
 app.use(express.json());
 
-// Routes
 const authRoutes = require('./src/routes/auth.routes');
 const taskRoutes = require('./src/routes/task.routes');
 const webhookRoutes = require('./src/routes/webhook.routes');
