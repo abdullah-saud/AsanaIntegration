@@ -49,7 +49,7 @@ Visit http://localhost:3000/asana/getRedirectUrl in your browser to begin the OA
 
 📦 Directory Structure
 
-akroolo-assignment/
+kroolo-assignment/
 ├── node_modules/
 ├── src/
 │   ├── controllers/
@@ -66,13 +66,15 @@ akroolo-assignment/
 │   │   └── user.helper.js
 │   └── webhooks/
 │       └── webhook.handler.js
-├── .env
-├── .gitignore
 ├── app.js
 ├── server.js
 ├── token.json
+├── .env
+├── .gitignore
 ├── package.json
-├── package-lock
+├── package-lock.json
+└── README.md
+
 
 
 🌐 Webhook Setup
