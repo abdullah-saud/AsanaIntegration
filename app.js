@@ -1,14 +1,20 @@
 const express = require('express');
+const dotenv = require('dotenv');
+dotenv.config();
 const app = express();
-const oauthRoutes = require('./routes/asanaAuth.route');
-const taskRoutes = require('./routes/asanaTasks.routes');
-const webhookRoutes = require('./routes/asanaWebhook.route');
-require('dotenv').config();
+
+// Middleware
 app.use(express.json());
 
-app.use('/asana', oauthRoutes);
-app.use('/tasks', taskRoutes);
+// Routes
+const authRoutes = require('./src/routes/auth.routes');
+const taskRoutes = require('./src/routes/task.routes');
+const webhookRoutes = require('./src/routes/webhook.routes');
 
-app.use('/webhook',webhookRoutes);
+app.use('/', authRoutes);
+app.use('/', taskRoutes);
+app.use('/', webhookRoutes);
 
-app.listen(3008, () => console.log('Server Up and Running'));
+// Start server
+const PORT = process.env.PORT || 3008;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
