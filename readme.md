@@ -8,9 +8,8 @@ This project enables integration with Asana using OAuth2, allowing authenticated
 
 - OAuth2 integration with Asana
 - Secure token storage with refresh handling
-- Fetch authenticated user’s tasks
+- Fetch the authenticated user’s tasks
 - Webhook support for task updates
-- Modular, production-ready architecture
 
 ---
 
@@ -33,61 +32,31 @@ This project enables integration with Asana using OAuth2, allowing authenticated
 
 Fill in the following variables:
 
-ASANA_CLIENT_ID=YOUR_ID
-ASANA_CLIENT_SECRET=YOUR_SECRET
+ASANA_CLIENT_ID=YOUR_CLIENT_ID
+ASANA_CLIENT_SECRET=YOUR_CLIENT_SECRET
 ASANA_REDIRECT_URI=https://0246-2401-4900-883c-10bc-d0f8-4817-7aef-e858.ngrok-free.app/asana/auth/callback
 ASANA_AUTH_URL=https://app.asana.com/-/oauth_authorize?
+
 ASANA_SCOPES=openid email profile default identity
 ASANA_WEBHOOK_TARGET=https://0246-2401-4900-883c-10bc-d0f8-4817-7aef-e858.ngrok-free.app/webhook/receive
 
 
-🧪 Run the App
+### 4. Run the App
 
 npm run dev
 
 Visit http://localhost:3008/asana/getRedirectUrl in your browser to begin the OAuth2 flow.
 
-📦 Directory Structure
-
-akroolo-assignment/
-├── node_modules/
-├── src/
-│   ├── controllers/
-│   │   ├── auth.controller.js
-│   │   └── task.controller.js
-│   ├── routes/
-│   │   ├── auth.routes.js
-│   │   ├── task.routes.js
-│   │   └── webhook.routes.js
-│   ├── utils/
-│   │   ├── oauth.helper.js
-│   │   ├── project.helper.js
-│   │   ├── token.helper.js
-│   │   └── user.helper.js
-│   └── webhooks/
-│       └── webhook.handler.js
-├── .env
-├── .gitignore
-├── app.js
-├── server.js
-├── token.json
-├── package.json
-├── package-lock
 
 
-🌐 Webhook Setup
+### 5. Webhook Setup
+
 Use Ngrok to expose localhost:
 
 ngrok http 3008
 
 Then use the HTTPS URL for webhook registration:
 
-await webhooksApi.createWebhook({
-  data: {
-    resource: '<TASK_OR_PROJECT_GID>',
-    target: 'https://<ngrok-url>/webhooks/create'
-  }
-});
 
 📌 Notes
 token.json is used to store your access and refresh tokens.
