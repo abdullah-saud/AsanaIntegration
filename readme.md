@@ -35,7 +35,7 @@ Fill in the following variables:
 ASANA_CLIENT_ID=YOUR_CLIENT_ID
 ASANA_CLIENT_SECRET=YOUR_CLIENT_SECRET
 ASANA_REDIRECT_URI=https://0246-2401-4900-883c-10bc-d0f8-4817-7aef-e858.ngrok-free.app/asana/auth/callback
-ASANA_AUTH_URL=https://app.asana.com/-/oauth_authorize?
+ASANA_AUTH_URL=https://app.asana.com/-/oauth_authorize
 
 ASANA_SCOPES=openid email profile default identity
 ASANA_WEBHOOK_TARGET=https://0246-2401-4900-883c-10bc-d0f8-4817-7aef-e858.ngrok-free.app/webhook/receive
